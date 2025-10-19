@@ -1,0 +1,47 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+image: python:3.11
+
+stages:
+  - lint
+  - test
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  key: pip
+  paths:
+    - .cache/pip
+
+before_script:
+  - python --version
+  - pip install --upgrade pip
+  - pip install -r requirements.txt
+
+flake8:
+  stage: lint
+  script:
+    - flake8 src/
+
+black:
+  stage: lint
+  script:
+    - black --check src/
+
+isort:
+  stage: lint
+  script:
+    - isort --check-only src/
+
+mypy:
+  stage: lint
+  script:
+    - mypy src/
+
+pytest:
+  stage: test
+  script:
+    - pytest -q tests
